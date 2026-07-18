@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crea y Prospera - Suite Interactiva</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        const Icon = ({ path, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{__html: path}} />
+        );
+
+        const Calculator = (p) => <Icon {...p} path='<rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line>' />;
+        const Sparkles = (p) => <Icon {...p} path='<path d="M12 3v18"/><path d="M3 12h18"/><path d="m15 15-6-6"/><path d="m15 9-6 6"/>' />;
+        const Beaker = (p) => <Icon {...p} path='<path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M14 9h4"/>' />;
+        const Trash2 = (p) => <Icon {...p} path='<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>' />;
+        const Check = (p) => <Icon {...p} path='<polyline points="20 6 9 17 4 12"></polyline>' />;
+        const User = (p) => <Icon {...p} path='<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' />;
+        const Star = (p) => <Icon {...p} path='<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>' />;
+        const Edit3 = (p) => <Icon {...p} path='<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>' />;
+        const Lightbulb = (p) => <Icon {...p} path='<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>' />;
+        const Package = (p) => <Icon {...p} path='<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>' />;
+        const Copy = (p) => <Icon {...p} path='<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' />;
+        const ChevronRight = (p) => <Icon {...p} path='<polyline points="9 18 15 12 9 6"></polyline>' />;
+        const Info = (p) => <Icon {...p} path='<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>' />;
+
+        function App() {
+            const [creatorName, setCreatorName] = useState(() => localStorage.getItem('cp_creator_name') || '');
+            const [isEditingName, setIsEditingName] = useState(() => !localStorage.getItem('cp_creator_name'));
+            const [tempName, setTempName] = useState(creatorName);
+            const [activeTab, setActiveTab] = useState('calculator');
+            
+            const [savedProducts, setSavedProducts] = useState(() => {
+                const local = localStorage.getItem('cp_saved_products_cop');
+                return local ? JSON.parse(local) : [];
+            });
+            const [savedCollections, setSavedCollections] = useState(() => {
+                const local = localStorage.getItem('cp_saved_collections_cop');
+                return local ? JSON.parse(local) : [];
+            });
+
+            useEffect(() => { localStorage.setItem('cp_saved_products_cop', JSON.stringify(savedProducts)); }, [savedProducts]);
+            useEffect(() => { localStorage.setItem('cp_saved_collections_cop', JSON.stringify(savedCollections)); }, [savedCollections]);
+
+            const formatCOP = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(value) || 0);
+
+            const [calcCategory, setCalcCategory] = useState('velas');
+            const [prodName, setProdName] = useState('');
+            const [mainQty, setMainQty] = useState(150); 
+            const [mainCostPkg, setMainCostPkg] = useState(45000); 
+            const [mainSizePkg, setMainSizePkg] = useState(1000); 
+            const [fragranceQty, setFragranceQty] = useState(10); 
+            const [fragranceCostPkg, setFragranceCostPkg] = useState(30000); 
+            const [fragranceSizePkg, setFragranceSizePkg] = useState(100);
+            const [containerCost, setContainerCost] = useState(4500); 
+            const [laborHours, setLaborHours] = useState(0.5); 
+            const [hourlyRate, setHourlyRate] = useState(10000); 
+            const [profitMargin, setProfitMargin] = useState(60); 
+            const [utilitiesCost, setUtilitiesCost] = useState(1500); 
+            const [toolDepreciation, setToolDepreciation] = useState(800); 
+            const [shippingPkgCost, setShippingPkgCost] = useState(3500); 
+
+            const [simCategory, setSimCategory] = useState('velas');
+            const [mouldCapacity, setMouldCapacity] = useState(200); 
+            const [fragrancePercent, setFragrancePercent] = useState(8); 
+            const [resinaRatio, setResinaRatio] = useState('1:1'); 
+            const [alchemySteps, setAlchemySteps] = useState({ step1: false, step2: false, step3: false });
+            const [selectedVibe, setSelectedVibe] = useState('relax');
+            const [copiedText, setCopiedText] = useState(false);
+
+            const handleImageError = (e, type) => {
+                e.target.onerror = null;
+                if (type === 'banner') e.target.src = "https://placehold.co/1200x400/460479/ffffff?text=Crea+y+Prospera";
+                else e.target.src = "https://placehold.co/500x750/ff385c/ffffff?text=Megapack";
+            };
+
+            const calculations = useMemo(() => {
+                const mainCost = (mainQty * (mainCostPkg / mainSizePkg)) || 0;
+                const fragCost = (fragranceQty * (fragranceCostPkg / fragranceSizePkg)) || 0;
+                const packaging = parseFloat(containerCost) || 0;
+                const addOnsCost = parseFloat(utilitiesCost) + parseFloat(toolDepreciation) + parseFloat(shippingPkgCost);
+                const rawMaterialsCost = mainCost + fragCost + packaging + addOnsCost;
+                const laborCost = (parseFloat(laborHours) * parseFloat(hourlyRate)) || 0;
+                const totalCost = rawMaterialsCost + laborCost;
+                const factor = (100 - profitMargin) / 100;
+                const suggestedPrice = factor > 0 ? (totalCost / factor) : totalCost * 2;
+                const netProfit = suggestedPrice - totalCost;
+                return { mainCost, fragCost, materialsOnly: rawMaterialsCost - addOnsCost, addOnsCost, laborCost, totalCost, suggestedPrice, netProfit, retailPriceX3: totalCost * 3, wholesalePriceX2: totalCost * 2 };
+            }, [mainQty, mainCostPkg, mainSizePkg, fragranceQty, fragranceCostPkg, fragranceSizePkg, containerCost, laborHours, hourlyRate, profitMargin, utilitiesCost, toolDepreciation, shippingPkgCost]);
+
+            const formulaResult = useMemo(() => {
+                const capacity = parseFloat(mouldCapacity) || 0;
+                const fragP = parseFloat(fragrancePercent) || 0;
+                if (simCategory === 'velas') return { baseName: 'Cera', baseQty: (capacity / (1 + (fragP / 100))).toFixed(1), fragName: 'Fragancia', fragQty: (capacity - (capacity / (1 + (fragP / 100)))).toFixed(1), unit: 'g' };
+                if (simCategory === 'jabones') return { baseName: 'Glicerina', baseQty: (capacity - (capacity * (fragP / 100))).toFixed(1), fragName: 'Aditivos', fragQty: (capacity * (fragP / 100)).toFixed(1), unit: 'g' };
+                if (resinaRatio === '1:1') return { baseName: 'Resina A', baseQty: (capacity / 2).toFixed(1), fragName: 'Catalizador B', fragQty: (capacity / 2).toFixed(1), unit: 'ml/g' };
+                return { baseName: 'Resina A', baseQty: ((capacity / 3) * 2).toFixed(1), fragName: 'Catalizador B', fragQty: (capacity / 3).toFixed(1), unit: 'ml/g' };
+            }, [simCategory, mouldCapacity, fragrancePercent, resinaRatio]);
+
+            useEffect(() => { setAlchemySteps({ step1: false, step2: false, step3: false }); }, [simCategory]);
+
+            const vibesData = {
+                relax: { title: 'Relajacion Profunda', description: 'Estilo Zen/Spa. Evoca paz y balance absoluto.', colors: [{name: 'Lavanda', hex: '#E9D5FF'}, {name: 'Eucalipto', hex: '#A7F3D0'}, {name: 'Lino', hex: '#F8FAFC'}], scents: '60% Lavanda, 30% Manzanilla, 10% Sandalo.', decor: 'Capullos de lavanda.', names: ['Brisa del Olivo', 'Serafina Zen'], hook: 'Un respiro para tu hogar.' },
+                mystic: { title: 'Energia Magica', description: 'Mistica & Cristales.', colors: [{name: 'Purpura', hex: '#D8B4FE'}, {name: 'Galaxia', hex: '#93C5FD'}, {name: 'Oro', hex: '#FDE047'}], scents: '50% Sandalo, 30% Palo Santo, 20% Incienso.', decor: 'Mica y cuarzos.', names: ['Despertar Mistico', 'Alquimia'], hook: 'Magia en cada detalle.' },
+                luxury: { title: 'Lujo Minimalista', description: 'Estetica boutique.', colors: [{name: 'Azabache', hex: '#1E293B'}, {name: 'Champagne', hex: '#FEF08A'}, {name: 'Gris', hex: '#E2E8F0'}], scents: '40% Tabaco Dulce, 40% Vainilla, 20% Cedro.', decor: 'Pabilo de madera.', names: ['Oud & Vainilla', 'Bruma'], hook: 'Sofisticacion en esencia.' },
+                tropical: { title: 'Frescura Tropical', description: 'Alegre y citrica.', colors: [{name: 'Mandarina', hex: '#FED7AA'}, {name: 'Verbena', hex: '#FEF08A'}, {name: 'Hibisco', hex: '#FBCFE8'}], scents: '50% Verbena, 30% Coco, 20% Mango.', decor: 'Naranja deshidratada.', names: ['Amanecer Citrico', 'Mango Bloom'], hook: 'Explosion de energia.' }
+            };
+            const currentVibe = vibesData[selectedVibe];
+
+            const copyToClipboard = (text) => { navigator.clipboard.writeText(text); setCopiedText(true); setTimeout(() => setCopiedText(false), 2000); };
+            const handleSaveCreatorName = (e) => { e.preventDefault(); if (tempName.trim()) { setCreatorName(tempName); localStorage.setItem('cp_creator_name', tempName); setIsEditingName(false); } };
+            const handleSaveProduct = (e) => { e.preventDefault(); if (!prodName.trim()) return; setSavedProducts([{ id: Date.now(), name: prodName, category: calcCategory, cost: calculations.totalCost, price: calculations.suggestedPrice, profit: calculations.netProfit, margin: profitMargin }, ...savedProducts]); setProdName(''); };
+            const handleDeleteProduct = (id) => { setSavedProducts(savedProducts.filter(p => p.id !== id)); };
+            const handleSaveCollection = () => { setSavedCollections([{ id: Date.now(), vibeName: currentVibe.title, names: currentVibe.names[0] }, ...savedCollections]); };
+            const handleDeleteCollection = (id) => { setSavedCollections(savedCollections.filter(c => c.id !== id)); };
+
+            return (
+                <div className="min-h-screen bg-[#ffffff] text-[#222222] font-sans antialiased flex flex-col selection:bg-[#ffd1da]">
+                    <header className="bg-[#ffffff] border-b border-[#ebebeb] py-6 px-6 sticky top-0 z-50">
+                        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-[#ff385c] text-white p-2.5 rounded-full shadow-sm">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold text-[#ff385c] tracking-tight">Crea y Prospera</h1>
+                                    <p className="text-[11px] text-[#6a6a6a] font-medium uppercase tracking-widest">Megapack de Aprendizaje Exitoso</p>
+                                </div>
+                            </div>
+                            <a href="https://drive.google.com/drive/folders/1rJ5X3g7y5ZC3VcZT0d7gB339233_u2kG?usp=drive_link" target="_blank" className="flex items-center gap-1.5 px-4 py-2 border-2 border-[#ff385c] text-[#ff385c] hover:bg-[#ffd1da]/20 text-xs font-bold rounded-full transition-all shadow-sm">
+                                <Package className="w-3.5 h-3.5" /> Tutorial MEGAPACK
+                            </a>
+                        </div>
+                    </header>
+
+                    <main className="max-w-6xl w-full mx-auto px-6 py-10 flex-grow space-y-10">
+                        
+                        <div className="w-full rounded-2xl overflow-hidden shadow-sm border border-[#ebebeb] mb-6">
+                            <img src="ChatGPT Image 17 jul 2026, 20_17_17.png" onError={(e) => handleImageError(e, 'banner')} className="w-full h-auto object-cover max-h-[340px]" />
+                        </div>
+
+                        <div className="mb-10">
+                            {isEditingName ? (
+                                <div className="border border-[#dddddd] bg-[#f7f7f7] rounded-xl overflow-hidden shadow-sm max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12">
+                                    <div className="md:col-span-5 h-full min-h-[350px] relative overflow-hidden bg-[#ebebeb]">
+                                        <img src="ChatGPT Image 17 jul 2026, 20_15_50_3.png" onError={(e) => handleImageError(e, 'book')} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="md:col-span-7 p-6 bg-white flex flex-col justify-center">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="bg-[#ff385c] text-white p-2.5 rounded-full"><User className="w-5 h-5" /></div>
+                                            <div>
+                                                <h3 className="font-semibold text-base">¡Te damos la bienvenida!</h3>
+                                                <p className="text-xs text-[#6a6a6a]">Personaliza tus cálculos e ideas comerciales.</p>
+                                            </div>
+                                        </div>
+                                        <form onSubmit={handleSaveCreatorName} className="flex gap-3">
+                                            <div className="flex-grow border border-[#dddddd] rounded-lg p-2.5">
+                                                <label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Tu Nombre</label>
+                                                <input type="text" value={tempName} onChange={(e) => setTempName(e.target.value)} className="w-full outline-none text-sm pt-0.5" />
+                                            </div>
+                                            <button type="submit" className="px-6 py-3.5 bg-[#ff385c] text-white text-xs font-semibold uppercase rounded-lg">Personalizar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="border border-[#ebebeb] rounded-xl overflow-hidden shadow-sm flex flex-col sm:flex-row max-w-6xl mx-auto">
+                                    <div className="hidden sm:block w-32 flex-shrink-0 bg-[#ebebeb]">
+                                        <img src="ChatGPT Image 17 jul 2026, 20_15_50_3.png" onError={(e) => handleImageError(e, 'book')} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-grow p-5 flex justify-between items-center gap-4">
+                                        <div className="flex items-center gap-3.5">
+                                            <div className="w-10 h-10 rounded-full bg-[#ffd1da] flex items-center justify-center text-[#ff385c] font-bold">{creatorName ? creatorName.charAt(0).toUpperCase() : 'C'}</div>
+                                            <div>
+                                                <h3 className="font-semibold text-base">Suite Profesional de <span className="text-[#ff385c]">{creatorName}</span></h3>
+                                                <p className="text-xs text-[#6a6a6a] flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-[#ff385c]" /> Herramientas financieras (COP)</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setIsEditingName(true)} className="flex items-center gap-1.5 text-xs font-semibold text-[#6a6a6a] border border-[#dddddd] px-3.5 py-2 rounded-full"><Edit3 className="w-3.5 h-3.5" /> Editar Nombre</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {[
+                                {id: 'calculator', icon: <Calculator className="w-6 h-6"/>, title: 'Precios y Costos', desc: 'Calcula costos de insumos, incluye mano de obra y define márgenes (COP).'},
+                                {id: 'alchemy', icon: <Beaker className="w-6 h-6"/>, title: 'Fórmulas de Alquimia', desc: 'Simula proporciones exactas para evitar desperdiciar materiales.'},
+                                {id: 'designer', icon: <Sparkles className="w-6 h-6"/>, title: 'Diseño Creativo', desc: 'Crea estética boutique con aromaterapia, micas y copys.'}
+                            ].map(tab => (
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-left p-6 rounded-2xl border transition-all ${activeTab === tab.id ? 'border-[#ff385c] shadow-md ring-1 ring-[#ff385c]' : 'border-[#dddddd] hover:border-[#222222]'}`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className={`p-3 rounded-xl ${activeTab === tab.id ? 'bg-[#ffd1da] text-[#ff385c]' : 'bg-[#f7f7f7] text-[#222222]'}`}>{tab.icon}</div>
+                                        {activeTab === tab.id && <span className="text-[10px] bg-[#ff385c] text-white px-2.5 py-0.5 rounded-full uppercase">Activo</span>}
+                                    </div>
+                                    <h3 className="font-semibold text-lg">{tab.title}</h3>
+                                    <p className="text-xs text-[#6a6a6a] mt-1.5">{tab.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+
+                        {activeTab === 'calculator' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="border-b border-[#ebebeb] pb-6">
+                                    <h2 className="text-[26px] font-semibold">Estructura Financiera (COP)</h2>
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                    <div className="lg:col-span-7 space-y-6">
+                                        <div className="flex gap-1.5 bg-[#f7f7f7] p-1 rounded-full w-max">
+                                            {['velas', 'jabones', 'resina'].map((cat) => (
+                                                <button key={cat} onClick={() => setCalcCategory(cat)} className={`px-4 py-1.5 text-xs font-semibold rounded-full capitalize ${calcCategory === cat ? 'bg-white shadow-sm' : 'text-[#6a6a6a]'}`}>{cat}</button>
+                                            ))}
+                                        </div>
+                                        <form onSubmit={handleSaveProduct} className="space-y-6">
+                                            <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[11px] font-bold text-[#6a6a6a] uppercase">Nombre</label><input type="text" value={prodName} onChange={(e) => setProdName(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                            
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Gramos base</label><input type="number" value={mainQty} onChange={(e) => setMainQty(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Costo bolsa base</label><input type="number" value={mainCostPkg} onChange={(e) => setMainCostPkg(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Gramos en bolsa</label><input type="number" value={mainSizePkg} onChange={(e) => setMainSizePkg(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Gramos fragancia</label><input type="number" value={fragranceQty} onChange={(e) => setFragranceQty(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Costo botella</label><input type="number" value={fragranceCostPkg} onChange={(e) => setFragranceCostPkg(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Gramos en botella</label><input type="number" value={fragranceSizePkg} onChange={(e) => setFragranceSizePkg(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Costo 1 Envase</label><input type="number" value={containerCost} onChange={(e) => setContainerCost(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Horas trabajo</label><input type="number" step="0.1" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Pago x Hora</label><input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 gap-3 bg-[#f7f7f7] p-4 rounded-xl border border-[#ebebeb]">
+                                                <div className="border border-[#dddddd] bg-white rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Servicios extras</label><input type="number" value={utilitiesCost} onChange={(e) => setUtilitiesCost(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] bg-white rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Desgaste molde</label><input type="number" value={toolDepreciation} onChange={(e) => setToolDepreciation(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                                <div className="border border-[#dddddd] bg-white rounded-lg p-3"><label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Costo envío/caja</label><input type="number" value={shippingPkgCost} onChange={(e) => setShippingPkgCost(e.target.value)} className="w-full outline-none text-sm pt-1" /></div>
+                                            </div>
+
+                                            <div className="pt-2">
+                                                <label className="text-xs font-bold uppercase">Margen Objetivo ({profitMargin}%)</label>
+                                                <input type="range" min="20" max="90" value={profitMargin} onChange={(e) => setProfitMargin(e.target.value)} className="w-full accent-[#ff385c]" />
+                                            </div>
+
+                                            <button type="submit" className="w-full py-3 bg-[#ff385c] text-white font-semibold rounded-lg flex justify-center items-center gap-2"><Check className="w-4 h-4"/> Guardar Lote</button>
+                                        </form>
+                                    </div>
+                                    <div className="lg:col-span-5">
+                                        <div className="border border-[#dddddd] rounded-lg p-6 shadow-md sticky top-32">
+                                            <span className="text-2xl font-bold">{formatCOP(calculations.suggestedPrice)}</span> <span className="text-sm text-[#6a6a6a]">/ pza</span>
+                                            <div className="space-y-4 pt-4 mt-4 border-t border-[#ebebeb]">
+                                                <div className="flex justify-between text-sm"><span className="underline">Insumos y envase</span><span>{formatCOP(calculations.materialsOnly)}</span></div>
+                                                <div className="flex justify-between text-sm"><span className="underline">Costos extra</span><span>{formatCOP(calculations.addOnsCost)}</span></div>
+                                                <div className="flex justify-between text-sm"><span className="underline">Mano de obra</span><span>{formatCOP(calculations.laborCost)}</span></div>
+                                                <div className="flex justify-between text-sm"><span className="underline">Margen ganancia</span><span className="text-[#ff385c] font-semibold">+{formatCOP(calculations.netProfit)}</span></div>
+                                                <div className="flex justify-between font-bold pt-4 border-t border-[#ebebeb]"><span>Costo Unitario Total</span><span>{formatCOP(calculations.totalCost)}</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'alchemy' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <h2 className="text-[26px] font-semibold border-b border-[#ebebeb] pb-6">Fórmulas Exactas de Dosificación</h2>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                    <div className="border border-[#dddddd] rounded-lg p-6 space-y-6">
+                                        <div className="flex gap-2 bg-[#f7f7f7] p-1 rounded-xl">
+                                            {['velas', 'jabones', 'resina'].map((opt) => (
+                                                <button key={opt} onClick={() => setSimCategory(opt)} className={`py-2 px-3 text-xs font-bold rounded-lg capitalize ${simCategory === opt ? 'bg-white text-[#ff385c]' : 'text-[#6a6a6a]'}`}>{opt}</button>
+                                            ))}
+                                        </div>
+                                        <div className="border border-[#dddddd] rounded-lg p-3">
+                                            <label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">Capacidad total Molde (g o ml)</label>
+                                            <input type="number" value={mouldCapacity} onChange={(e) => setMouldCapacity(e.target.value)} className="w-full outline-none pt-1" />
+                                        </div>
+                                        {simCategory !== 'resina' ? (
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-[#6a6a6a] uppercase">% Fragancia ({fragrancePercent}%)</label>
+                                                <input type="range" min="1" max="12" value={fragrancePercent} onChange={(e) => setFragrancePercent(e.target.value)} className="w-full accent-[#ff385c] mt-2" />
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-4">
+                                                <button onClick={() => setResinaRatio('1:1')} className={`flex-1 p-3 border rounded-lg font-bold text-sm ${resinaRatio === '1:1' ? 'border-[#ff385c] bg-[#ffd1da]/20' : 'border-[#dddddd]'}`}>Ratio 1:1</button>
+                                                <button onClick={() => setResinaRatio('2:1')} className={`flex-1 p-3 border rounded-lg font-bold text-sm ${resinaRatio === '2:1' ? 'border-[#ff385c] bg-[#ffd1da]/20' : 'border-[#dddddd]'}`}>Ratio 2:1</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="border border-[#dddddd] rounded-lg p-6 flex flex-col justify-center">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-[#f7f7f7] p-5 rounded-xl border border-[#ebebeb] text-center">
+                                                <span className="text-xs text-[#6a6a6a] block">{formulaResult.baseName}</span>
+                                                <strong className="text-3xl font-bold">{formulaResult.baseQty}</strong>
+                                            </div>
+                                            <div className="bg-[#ffd1da]/30 p-5 rounded-xl border border-[#ffd1da] text-center">
+                                                <span className="text-xs text-[#ff385c] block">{formulaResult.fragName}</span>
+                                                <strong className="text-3xl font-bold text-[#ff385c]">{formulaResult.fragQty}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'designer' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <h2 className="text-[26px] font-semibold border-b border-[#ebebeb] pb-6">Diseñador de Colecciones</h2>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                    <div className="space-y-2">
+                                        {Object.values(vibesData).map(v => (
+                                            <button key={v.title} onClick={() => setSelectedVibe(Object.keys(vibesData).find(k => vibesData[k].title === v.title))} className={`w-full text-left p-4 rounded-xl border ${currentVibe.title === v.title ? 'border-[#ff385c] bg-[#ffd1da]/10 text-[#ff385c] font-bold' : 'border-[#dddddd] hover:bg-[#f7f7f7]'}`}>
+                                                {v.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="lg:col-span-2 border border-[#dddddd] rounded-lg p-6 space-y-6 shadow-sm">
+                                        <h3 className="text-xl font-bold">{currentVibe.title}</h3>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {currentVibe.colors.map(c => (
+                                                <div key={c.name} className="flex gap-2 items-center bg-[#f7f7f7] p-2 rounded-lg"><div className="w-6 h-6 rounded" style={{backgroundColor: c.hex}}></div><span className="text-xs font-bold">{c.name}</span></div>
+                                            ))}
+                                        </div>
+                                        <p className="text-sm bg-[#f7f7f7] p-4 rounded-lg"><strong>Aromas:</strong> {currentVibe.scents}</p>
+                                        <p className="text-sm italic border-l-4 border-[#ff385c] pl-4 py-2">"{currentVibe.hook}"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="bg-[#ffffff] border-t border-[#ebebeb] py-12 px-6 mt-12 text-center text-xs text-[#6a6a6a]">
+                        © 2026 Crea y Prospera, Inc. · Herramienta interactiva de soporte premium.
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
