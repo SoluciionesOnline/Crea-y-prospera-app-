@@ -243,18 +243,20 @@ const handleShareCard = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[
-                                {id: 'calculator', icon: <img src="icono-precios.png" className="w-6 h-6 object-contain"/>, title: 'Precios y Costos', desc: 'Calcula costos de insumos, incluye mano de obra y define márgenes (COP).'},
-                                {id: 'alchemy', icon: <img src="icono-formulas.png" className="w-6 h-6 object-contain"/>, title: 'Fórmulas de Alquimia', desc: 'Simula proporciones exactas para evitar desperdiciar materiales.'},
-                                {id: 'designer', icon: <img src="icono-diseno.png" className="w-6 h-6 object-contain"/>, title: 'Diseño Creativo', desc: 'Crea estética boutique con aromaterapia, micas y copys.'}
+                                {id: 'calculator', icon: <img src="icono-precios.png" className="w-full h-full object-cover"/>, title: 'Precios y Costos', desc: 'Calcula costos de insumos, incluye mano de obra y define márgenes (COP).'},
+                                {id: 'alchemy', icon: <img src="icono-formulas.png" className="w-full h-full object-cover"/>, title: 'Fórmulas de Alquimia', desc: 'Simula proporciones exactas para evitar desperdiciar materiales.'},
+                                {id: 'designer', icon: <img src="icono-diseno.png" className="w-full h-full object-cover"/>, title: 'Diseño Creativo', desc: 'Crea estética boutique con aromaterapia, micas y copys.'}
                             ].map(tab => (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-left p-6 rounded-2xl border transition-all ${activeTab === tab.id ? 'border-[#ff385c] shadow-md ring-1 ring-[#ff385c]' : 'border-[#dddddd] hover:border-[#222222]'}`}>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className={`p-3 rounded-xl ${activeTab === tab.id ? 'bg-[#ffd1da] text-[#ff385c]' : 'bg-[#f7f7f7] text-[#222222]'}`}>{tab.icon}</div>
-                                        {activeTab === tab.id && <span className="text-[10px] bg-[#ff385c] text-white px-2.5 py-0.5 rounded-full uppercase">Activo</span>}
-                                    </div>
-                                    <h3 className="font-semibold text-lg">{tab.title}</h3>
-                                    <p className="text-xs text-[#6a6a6a] mt-1.5">{tab.desc}</p>
-                                </button>
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-left rounded-2xl border overflow-hidden transition-all ${activeTab === tab.id ? 'border-[#ff385c] shadow-md ring-1 ring-[#ff385c]' : 'border-[#dddddd] hover:border-[#222222]'}`}>
+                        <div className="relative w-full aspect-square bg-[#f7f7f7]">
+                            {tab.icon}
+                            {activeTab === tab.id && <span className="absolute top-3 right-3 text-[10px] bg-[#ff385c] text-white px-2.5 py-0.5 rounded-full uppercase font-semibold">Activo</span>}
+                        </div>
+                        <div className="p-4">
+                            <h3 className="font-semibold text-lg">{tab.title}</h3>
+                            <p className="text-xs text-[#6a6a6a] mt-1.5">{tab.desc}</p>
+                        </div>
+                    </button>
                             ))}
                         </div>
 
