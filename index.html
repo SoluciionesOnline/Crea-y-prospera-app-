@@ -126,6 +126,12 @@
                 luxury: { title: 'Lujo Minimalista', description: 'Estetica boutique.', colors: [{name: 'Azabache', hex: '#1E293B'}, {name: 'Champagne', hex: '#FEF08A'}, {name: 'Gris', hex: '#E2E8F0'}], scents: '40% Tabaco Dulce, 40% Vainilla, 20% Cedro.', decor: 'Pabilo de madera.', names: ['Oud & Vainilla', 'Bruma'], hook: 'Sofisticacion en esencia.' },
                 tropical: { title: 'Frescura Tropical', description: 'Alegre y citrica.', colors: [{name: 'Mandarina', hex: '#FED7AA'}, {name: 'Verbena', hex: '#FEF08A'}, {name: 'Hibisco', hex: '#FBCFE8'}], scents: '50% Verbena, 30% Coco, 20% Mango.', decor: 'Naranja deshidratada.', names: ['Amanecer Citrico', 'Mango Bloom'], hook: 'Explosion de energia.' }
             };
+            const pinterestLinks = {
+    relax: 'https://co.pinterest.com/pin/59109813856297314/',
+    mystic: 'https://co.pinterest.com/search/pins/?q=velas%20energeticas&rs=ac&len=10&source_id=ac_Aj9D11Bq&eq=velas%20ener&etslf=6655',
+    tropical: 'https://co.pinterest.com/search/pins/?q=velas%20frescura&rs=typed',
+    luxury: 'https://co.pinterest.com/search/pins/?q=velas%20lujosas&rs=ac&len=9&source_id=ac_T2rdRtxd&eq=velas%20luj&etslf=3774'
+};
             const currentVibe = vibesData[selectedVibe];
 
             const copyToClipboard = (text) => { navigator.clipboard.writeText(text); setCopiedText(true); setTimeout(() => setCopiedText(false), 2000); };
