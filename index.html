@@ -243,9 +243,9 @@ const handleShareCard = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[
-                                {id: 'calculator', icon: <Calculator className="w-6 h-6"/>, title: 'Precios y Costos', desc: 'Calcula costos de insumos, incluye mano de obra y define márgenes (COP).'},
-                                {id: 'alchemy', icon: <Beaker className="w-6 h-6"/>, title: 'Fórmulas de Alquimia', desc: 'Simula proporciones exactas para evitar desperdiciar materiales.'},
-                                {id: 'designer', icon: <Sparkles className="w-6 h-6"/>, title: 'Diseño Creativo', desc: 'Crea estética boutique con aromaterapia, micas y copys.'}
+                                {id: 'calculator', icon: <img src="icono-precios.png" className="w-6 h-6 object-contain"/>, title: 'Precios y Costos', desc: 'Calcula costos de insumos, incluye mano de obra y define márgenes (COP).'},
+                                {id: 'alchemy', icon: <img src="icono-formulas.png" className="w-6 h-6 object-contain"/>, title: 'Fórmulas de Alquimia', desc: 'Simula proporciones exactas para evitar desperdiciar materiales.'},
+                                {id: 'designer', icon: <img src="icono-diseno.png" className="w-6 h-6 object-contain"/>, title: 'Diseño Creativo', desc: 'Crea estética boutique con aromaterapia, micas y copys.'}
                             ].map(tab => (
                                 <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`text-left p-6 rounded-2xl border transition-all ${activeTab === tab.id ? 'border-[#ff385c] shadow-md ring-1 ring-[#ff385c]' : 'border-[#dddddd] hover:border-[#222222]'}`}>
                                     <div className="flex justify-between items-start mb-4">
