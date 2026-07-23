@@ -140,7 +140,40 @@
             const handleDeleteProduct = (id) => { setSavedProducts(savedProducts.filter(p => p.id !== id)); };
             const handleSaveCollection = () => { setSavedCollections([{ id: Date.now(), vibeName: currentVibe.title, names: currentVibe.names[0] }, ...savedCollections]); };
             const handleDeleteCollection = (id) => { setSavedCollections(savedCollections.filter(c => c.id !== id)); };
+const handleShareCard = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1300;
+    const ctx = canvas.getContext('2d');
 
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+        ctx.fillStyle = '#fdf6f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+        ctx.fillStyle = currentVibe.colors[0]?.hex || '#f5d9d9';
+        ctx.fillRect(0, 1080, canvas.width, 220);
+        ctx.fillStyle = '#4A2545';
+        ctx.font = 'bold 44px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(currentVibe.title, canvas.width / 2, 1150);
+        ctx.font = 'italic 28px serif';
+        ctx.fillText(currentVibe.hook, canvas.width / 2, 1195);
+        if (creatorName) {
+            ctx.font = '24px sans-serif';
+            ctx.fillText(`Por ${creatorName}`, canvas.width / 2, 1250);
+        }
+        const link = document.createElement('a');
+        link.download = `${currentVibe.title.replace(/\s+/g, '-')}-mujer-creadora.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+    img.onerror = () => {
+        alert('No se pudo cargar la imagen de fondo. Intenta de nuevo.');
+    };
+    img.src = 'tarjeta-fondo.png';
+};
             return (
                 <div className="min-h-screen bg-[#ffffff] text-[#222222] font-sans antialiased flex flex-col selection:bg-[#ffd1da]">
                     <header className="bg-[#ffffff] border-b border-[#ebebeb] py-6 px-6 sticky top-0 z-50">
@@ -344,6 +377,7 @@
                                     <div className="lg:col-span-2 border border-[#dddddd] rounded-lg p-6 space-y-6 shadow-sm">
                                         <h3 className="text-xl font-bold">{currentVibe.title}</h3>
 <a href={pinterestLinks[selectedVibe]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ff385c] hover:underline mt-1">Ver inspiración en Pinterest →</a>
+                                        <button onClick={handleShareCard} className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#ff385c] hover:bg-[#e02e50] px-4 py-2 rounded-full mt-2">Descargar tarjeta para compartir</button>
                                         <div className="grid grid-cols-3 gap-3">
                                             {currentVibe.colors.map(c => (
                                                 <div key={c.name} className="flex gap-2 items-center bg-[#f7f7f7] p-2 rounded-lg"><div className="w-6 h-6 rounded" style={{backgroundColor: c.hex}}></div><span className="text-xs font-bold">{c.name}</span></div>
